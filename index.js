@@ -46,7 +46,7 @@ WHERE SkiPK = ${pk}`;
 
   db.executeQuery(myQuery)
     .then((result) => {
-      // console.log("result", result);
+      // console.log("result", result );
       if (result[0]) {
         res.send(result[0]);
       } else {
