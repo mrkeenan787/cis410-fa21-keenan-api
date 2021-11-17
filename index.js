@@ -3,8 +3,9 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const db = require("./dbConnectExec.js");
-// const { executeQuery } = require("./dbConnectExec.js");
+const { executeQuery } = require("./dbConnectExec.js");
 const keenanConfig = require("./config.js");
+const auth = require("./middleware/authenticate");
 
 const app = express();
 app.use(express.json());
@@ -24,28 +25,38 @@ app.get("/", (req, res) => {
 // app.post();
 // app.put();
 
-// const auth = async (req, res, next) => {
-//   console.log("in the middleware", req.header("Authorization"));
-// };
+app.post("/Post", auth, async (req, res) => {
+  try {
+    let Price = req.body.Price;
+    let Location = req.body.Location;
+    let ContactFK = req.body.ContactFK;
+    let SkiFK = req.body.SkiFK;
 
-// app.post("/post", auth, async (req, res) => {
-//   try {
-//     let price = req.body.price;
-//     let location = req.body.location;
-//     let contactFK = req.body.contactFK;
-//     let skiFK = req.body.skiFK;
+    if (!Price || !Location || !ContactFK || !SkiFK) {
+      return res.status(400).send("Bad request");
+    }
 
-//     if (!price || !location || !contactFK || !skiFK) {
-//       return res.status(400).send("Bad request");
-//     }
+    Location = Location.replace("'", "''");
+    // console.log("Price", Price)
+    // console.log("here is the contact", req.contact);
 
-//     // summary = summary.replace("'", "''");
-//     // console.log("summary", location);
-//   } catch (err) {
-//     console.log("Error in Post /post", err);
-//     res.status(500).send();
-//   }
-// });
+    let insertQuery = `INSERT INTO Post(Price, Location, ContactFK, SkiFK)
+    OUTPUT inserted.PostPK, inserted.Price, inserted.Location, inserted.ContactFK, inserted.SkiFK
+    VALUES ('${Price}','${Location}', '${ContactFK}', '${SkiFK}')`;
+
+    let insertedPost = await db.executeQuery(insertQuery);
+    // console.log("inserted post", insertedPost);
+    //  res.send("here is the response");
+    res.status(201).send(insertedPost[0]);
+  } catch (err) {
+    console.log("Error in Post /post", err);
+    res.status(500).send();
+  }
+});
+
+app.get("/contacts/me", auth, (req, res) => {
+  res.send(req.contact);
+});
 
 app.post("/contacts/login", async (req, res) => {
   // console.log("/contacts/login called", req.body);
