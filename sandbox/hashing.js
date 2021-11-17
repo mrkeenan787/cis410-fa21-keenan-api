@@ -7,3 +7,5 @@ console.log(hashedPassword);
 let hashTest = bcrypt.compareSync("csu123", hashedPassword);
 
 console.log(hashTest);
+
+// its soup dump time

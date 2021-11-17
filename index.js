@@ -1,7 +1,10 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const db = require("./dbConnectExec.js");
+// const { executeQuery } = require("./dbConnectExec.js");
+const keenanConfig = require("./config.js");
 
 const app = express();
 app.use(express.json());
@@ -20,6 +23,96 @@ app.get("/", (req, res) => {
 
 // app.post();
 // app.put();
+
+// const auth = async (req, res, next) => {
+//   console.log("in the middleware", req.header("Authorization"));
+// };
+
+// app.post("/post", auth, async (req, res) => {
+//   try {
+//     let price = req.body.price;
+//     let location = req.body.location;
+//     let contactFK = req.body.contactFK;
+//     let skiFK = req.body.skiFK;
+
+//     if (!price || !location || !contactFK || !skiFK) {
+//       return res.status(400).send("Bad request");
+//     }
+
+//     // summary = summary.replace("'", "''");
+//     // console.log("summary", location);
+//   } catch (err) {
+//     console.log("Error in Post /post", err);
+//     res.status(500).send();
+//   }
+// });
+
+app.post("/contacts/login", async (req, res) => {
+  // console.log("/contacts/login called", req.body);
+
+  //1. DATA Validation
+  let email = req.body.email;
+  let password = req.body.password;
+
+  if (!email || !password) {
+    return res.status(400).send("Bad Request");
+  }
+
+  //2. User exists in Database
+
+  let query = `SELECT *
+  FROM Customer
+  WHERE email = '${email}'`;
+
+  let result;
+  try {
+    result = await db.executeQuery(query);
+  } catch (myError) {
+    console.log("error in /contacts/login", myError);
+    return res.status(500).send();
+  }
+
+  if (!result[0]) {
+    return res.status(401).send("Invalid user credentials");
+  }
+
+  //3. Check Password
+  let user = result[0];
+
+  if (!bcrypt.compareSync(password, user.Password)) {
+    console.log("invalid password");
+    return res.status(401).send("Invalid User credentials");
+  }
+
+  //4. Generate Token
+  let token = jwt.sign({ pk: user.ContactPK }, keenanConfig.JWT, {
+    expiresIn: "60 minutes",
+  });
+  console.log("token", token);
+
+  //5. Save Token in DB and send response
+  let setTokenQuery = `UPDATE Customer
+  SET token = '${token}'
+  WHERE ContactPK = ${user.ContactPK}`;
+
+  try {
+    await db.executeQuery(setTokenQuery);
+
+    res.status(200).send({
+      token: token,
+      user: {
+        FirstName: user.FirstName,
+        LastName: user.LastName,
+        Email: user.Email,
+        Address: user.Address,
+        ContactPK: user.ContactPK,
+      },
+    });
+  } catch (myError) {
+    console.log("Error in setting user token", myError);
+    res.status(500).send();
+  }
+});
 
 app.post("/contacts", async (req, res) => {
   //   res.send("/contacts called");
