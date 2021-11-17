@@ -1,0 +1,4 @@
+{
+  "appService.defaultWebAppToDeploy": "/subscriptions/b1abfaec-b299-4cda-a2c5-8d4bd8a621d3/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/cis410-fa21-keenan-api",
+  "appService.deploySubpath": "."
+}

@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -10,9 +11,15 @@ const auth = require("./middleware/authenticate");
 const app = express();
 app.use(express.json());
 
-app.listen(5000, () => {
-  console.log(`app is running on port 5000`);
+//azure
+app.use(cors());
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`app is running on port ${PORT}`);
 });
+
+//azure
 
 app.get("/hi", (req, res) => {
   res.send("Hello World");
