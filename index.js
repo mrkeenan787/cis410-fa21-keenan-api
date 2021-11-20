@@ -132,6 +132,21 @@ app.post("/contacts/login", async (req, res) => {
   }
 });
 
+app.post("/contacts/logout", auth, (req, res) => {
+  let query = `UPDATE Customer
+  SET token = NULL
+  WHERE ContactPK = ${req.contact.ContactPK}`;
+
+  db.executeQuery(query)
+    .then(() => {
+      res.status(200).send();
+    })
+    .catch((err) => {
+      console.log("Error Logging Out", err);
+      res.status(500).send();
+    });
+});
+
 app.post("/contacts", async (req, res) => {
   //   res.send("/contacts called");
 
@@ -184,6 +199,25 @@ app.get("/skis", (req, res) => {
     LEFT JOIN Category
     ON Category.CategoryPK = ski.CategoryFK`
   )
+    .then((theResults) => {
+      res.status(200).send(theResults);
+    })
+    .catch((myError) => {
+      console.log(myError);
+      res.status(500).send();
+    });
+});
+
+app.get("/Post/me", (req, res) => {
+  let email = req.body.email;
+  let password = req.body.email;
+  let ContactFK = req.body.ContactFK;
+
+  let query = `SELECT *
+    FROM Post
+    WHERE ContactFK = ${ContactFK}`;
+
+  db.executeQuery(query)
     .then((theResults) => {
       res.status(200).send(theResults);
     })
