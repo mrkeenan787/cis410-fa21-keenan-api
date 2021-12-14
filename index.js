@@ -208,10 +208,38 @@ app.get("/skis", (req, res) => {
     });
 });
 
+// app.get("/contacts", (req, res) => {
+//   db.executeQuery(
+//     `SELECT *
+//     FROM Customer`
+//   )
+//     .then((theResults) => {
+//       res.status(200).send(theResults);
+//     })
+//     .catch((myError) => {
+//       console.log(myError);
+//       res.status(500).send();
+//     });
+// });
+
+app.get("/Post", (req, res) => {
+  db.executeQuery(
+    `SELECT *
+    FROM POST`
+  )
+    .then((theResults) => {
+      res.status(200).send(theResults);
+    })
+    .catch((myError) => {
+      console.log(myError);
+      res.status(500).send();
+    });
+});
+
 app.get("/Post/me", (req, res) => {
   let email = req.body.email;
   let password = req.body.email;
-  let ContactFK = req.body.ContactFK;
+  let ContactFK = req.body.ContactPK;
 
   let query = `SELECT *
     FROM Post
